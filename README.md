@@ -36,10 +36,10 @@ for more details.
 
 This will generate a workload with 10000 inserts and 3000 point-queries on existing keys. 
 
-Then, move the newly generated workload.txt file in LSM-Compaction-Analysis/examples/\_\_working_branch/ where our API resides. Make sure that the LSM-Compaction-Analysis and the K-V-Workload-Generator repositories are located in the same path.
+Then, move the newly generated workload.txt file in lethe-codebase/examples/\_\_working_branch/ where our API resides. Make sure that the lethe-codebase and the K-V-Workload-Generator repositories are located in the same path.
 
 ```
-cp workload.txt ../LSM-Compaction-Analysis/examples/__working_branch/
+cp workload.txt ../lethe-codebase/examples/__working_branch/
 ```
 
 After that, make sure that you have also compiled RocksDB. To do that navigate to LSM-Compaction-Analysis/ and run:
