@@ -1,32 +1,63 @@
-## RocksDB: A Persistent Key-Value Store for Flash and RAM Storage
+<H1> Lethe codebase: "Lethe: A Tunable Delete-Aware LSM Engine" </H1>
 
-[![CircleCI Status](https://circleci.com/gh/facebook/rocksdb.svg?style=svg)](https://circleci.com/gh/facebook/rocksdb)
-[![TravisCI Status](https://travis-ci.org/facebook/rocksdb.svg?branch=master)](https://travis-ci.org/facebook/rocksdb)
-[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/fbgfu0so3afcno78/branch/master?svg=true)](https://ci.appveyor.com/project/Facebook/rocksdb/branch/master)
-[![PPC64le Build Status](http://140.211.168.68:8080/buildStatus/icon?job=Rocksdb)](http://140.211.168.68:8080/job/Rocksdb)
+This repository is the modified version of RocksDB which contains Fade and was used to run the experiments for our latest work: "Lethe: A Tunable Delete-Aware LSM Engine". 
 
-RocksDB is developed and maintained by Facebook Database Engineering Team.
-It is built on earlier work on [LevelDB](https://github.com/google/leveldb) by Sanjay Ghemawat (sanjay@google.com)
-and Jeff Dean (jeff@google.com)
+Data-intensive applications fueled the evolution of log structured merge (LSM) based key-value engines that employ the out-of-place paradigm to support high ingestion rates with low read/write interference. These benefits, however, come at the cost of treating deletes as a second-class citizen. A delete inserts a tombstone that invalidates older instances of the deleted key. State-of-the-art LSM engines do not provide guarantees as to how fast a tombstone will propagate to persist the deletion. Further, LSM engines only support deletion on the sort key. To delete on another attribute (e.g., timestamp), the entire tree is read and re-written. We highlight that fast persistent deletion without affecting read performance is key to support: (i) streaming systems operating on a window of data, (ii) privacy with latency guarantees on the right-to-be-forgotten, and (iii) en masse cloud deployment of data systems that makes storage a precious resource
 
-This code is a library that forms the core building block for a fast
-key-value server, especially suited for storing data on flash drives.
-It has a Log-Structured-Merge-Database (LSM) design with flexible tradeoffs
-between Write-Amplification-Factor (WAF), Read-Amplification-Factor (RAF)
-and Space-Amplification-Factor (SAF). It has multi-threaded compactions,
-making it especially suitable for storing multiple terabytes of data in a
-single database.
+This work is accepted for publication in [SIGMOD 2020](https://dl.acm.org/doi/abs/10.1145/3318464.3389757). You can also access [our website](https://disc-projects.bu.edu/lethe/) for more information. 
 
-Start with example usage here: https://github.com/facebook/rocksdb/tree/master/examples
+<H1> Workload Generation </H1>
+To run our experiments we also implemented our own workload generator: https://github.com/BU-DiSC/K-V-Workload-Generator
+To generate a workload, simply give 
 
-See the [github wiki](https://github.com/facebook/rocksdb/wiki) for more explanation.
+```
+make
+./load_gen
+```
 
-The public interface is in `include/`.  Callers should not include or
-rely on the details of any other header files in this package.  Those
-internal APIs may be changed without warning.
+with the desired parameters. These include: Number of inserts, updates, deletes, point & range lookups, distribution styles, etc. 
 
-Design discussions are conducted in https://www.facebook.com/groups/rocksdb.dev/ and https://rocksdb.slack.com/
+<H1> Quick How-To </H1>
+To run a simple experiment you can follow this guide:
 
-## License
+First, clone the workload generator reposirtory and generate a workload. A simple command would be: 
 
-RocksDB is dual-licensed under both the GPLv2 (found in the COPYING file in the root directory) and Apache 2.0 License (found in the LICENSE.Apache file in the root directory).  You may select, at your option, one of the above-listed licenses.
+```
+./load_gen -I10000 -Q3000
+```
+
+More options are available. Type:
+
+```
+./load_gen --help 
+```
+
+for more details.
+
+This will generate a workload with 10000 inserts and 3000 point-queries on existing keys. 
+
+Then, move the newly generated workload.txt file in LSM-Compaction-Analysis/examples/\_\_working_branch/ where our API resides. Make sure that the LSM-Compaction-Analysis and the K-V-Workload-Generator repositories are located in the same path.
+
+```
+cp workload.txt ../LSM-Compaction-Analysis/examples/__working_branch/
+```
+
+After that, make sure that you have also compiled RocksDB. To do that navigate to LSM-Compaction-Analysis/ and run:
+```
+make static_lib
+```
+
+To run the workload, you need to go to examples/__working_branch/ directory and just give:
+
+```
+make
+./working_version
+```
+
+More options are available. Type:
+
+```
+./working_version --help 
+```
+
+for more details.
